@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-09-18 11:45+0000\n"
+"POT-Creation-Date: 2013-10-16 15:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,31 +17,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: beagleboy/beagleboy/messages.py:118
+#: beagleboy/messages.py:120
 msgid "Hi {person}!"
 msgstr ""
 
-#: beagleboy/beagleboy/messages.py:121
+#: beagleboy/messages.py:123
 msgid ""
 "A web page you're assigned to watch ({site_url}) has been modified. Can "
 "you go and check if there is some new, relevant information on the site "
 "or if important information has been removed?"
 msgstr ""
 
-#: beagleboy/beagleboy/messages.py:124
+#: beagleboy/messages.py:126
 msgid ""
 "Sometimes the changes are not relevant to what you're assigned to look at"
 " (and often they're not even visible), but we cannot easily check for "
 "context so we notify you everytime anything happens."
 msgstr ""
 
-#: beagleboy/beagleboy/messages.py:126
+#: beagleboy/messages.py:128
 msgid ""
 "If you notice any relevant modifications, please use the form at "
 "{form_url} to update the information about the web page."
 msgstr ""
 
-#: beagleboy/beagleboy/messages.py:138
+#: beagleboy/messages.py:140
 msgid "A web page you are watching has changed"
 msgstr ""
 

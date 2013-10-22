@@ -19,7 +19,6 @@ from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from beagleboy.items import WebResource
 from scrapy import log
 import pymongo
-from beagleboy import settings
 from hashlib import md5
 
 class WebResourceSpider(CrawlSpider):
@@ -67,7 +66,7 @@ class WebResourceSpider(CrawlSpider):
 
         # Open the database and access it based on the settings
         connection = pymongo.MongoClient()
-        db = connection[settings.MONGODB_DATABASE]
+        db = connection[self.crawler.settings.get('MONGODB_DATABASE')]
 
         # We use the aggregation framework to get all of the sites urls
         pipeline = [

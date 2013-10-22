@@ -21,7 +21,6 @@ from collections import defaultdict
 from scrapy import log
 from twisted.internet import defer
 from beagleboy.messages import Email
-from beagleboy import settings
 
 class UpdateChecker(object):
     """
@@ -44,8 +43,10 @@ class UpdateChecker(object):
         self.changes = defaultdict(list)        
 
         # Open up the database connection
+        settings = spider.crawler.settings
+        log.msg(spider.crawler.settings)
         self.connection = yield txmongo.MongoConnection()
-        self.db = self.connection[settings.MONGODB_DATABASE]
+        self.db = self.connection[settings.get('MONGODB_DATABASE')]
 
         # We use the aggregation framework to get all checksums for the sites
         pipeline = [{'$group': 

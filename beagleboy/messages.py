@@ -29,8 +29,7 @@ from email import Encoders
 from twisted.internet import reactor
 
 # Translations are located in the root directory
-# (one above the beagleboy directory)
-gettext.install('beagle', '../locale', unicode=True)
+gettext.install('beagle', 'locale', unicode=True)
 
 class BeagleSender(MailSender):
     """
@@ -101,7 +100,7 @@ class Email(object):
         
         # Install the translation and default to english
         user_locale = gettext.translation(
-            'beagle', '../locale',languages=[recipient.get('lang', 'en')])
+            'beagle', 'locale',languages=[recipient.get('lang', 'en')])
         user_locale.install(unicode=True)
 
     @property

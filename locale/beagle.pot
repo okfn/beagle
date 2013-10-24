@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-10-16 15:57+0000\n"
+"POT-Creation-Date: 2013-10-24 10:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,31 +17,46 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: beagleboy/messages.py:120
+#: reminder.py:99 beagleboy/messages.py:119
 msgid "Hi {person}!"
 msgstr ""
 
-#: beagleboy/messages.py:123
+#: reminder.py:100
+msgid ""
+"This is just a friendly reminder that the budget you're assigned to watch"
+" should have been released. If it has already been released then you can "
+"ignore this message. If not, then go and check if it has been released."
+msgstr ""
+
+#: reminder.py:101
+msgid "Here is what you should be specifically looking at now: {sitelist}"
+msgstr ""
+
+#: reminder.py:109
+msgid "Budget Reminder"
+msgstr ""
+
+#: beagleboy/messages.py:122
 msgid ""
 "A web page you're assigned to watch ({site_url}) has been modified. Can "
 "you go and check if there is some new, relevant information on the site "
 "or if important information has been removed?"
 msgstr ""
 
-#: beagleboy/messages.py:126
+#: beagleboy/messages.py:125
 msgid ""
 "Sometimes the changes are not relevant to what you're assigned to look at"
 " (and often they're not even visible), but we cannot easily check for "
 "context so we notify you everytime anything happens."
 msgstr ""
 
-#: beagleboy/messages.py:128
+#: beagleboy/messages.py:127
 msgid ""
 "If you notice any relevant modifications, please use the form at "
 "{form_url} to update the information about the web page."
 msgstr ""
 
-#: beagleboy/messages.py:140
+#: beagleboy/messages.py:139
 msgid "A web page you are watching has changed"
 msgstr ""
 

@@ -1,4 +1,4 @@
-# beagleboy - scrape web resources for changes and notify users by email
+# beagle - scrape web resources for changes and notify users by email
 # Copyright (C) 2013  The Open Knowledge Foundation
 #
 # This program is free software: you can redistribute it and/or modify

@@ -7,7 +7,7 @@
 #
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'beagleboy (+http://www.yourdomain.com)'
+USER_AGENT = 'Beagle budget scraper (+http://)'
 
 FORM_URL = 'http://somewhere.form'
 
@@ -20,6 +20,10 @@ MAIL_PASS = ''
 # MongoDB configurations (collections are automatic so we only need the
 # database name
 MONGODB_DATABASE = 'beagle'
+
+# Number of weeks to run checks and reminders after publication date
+# i.e. to send out emails
+PUBLICATION_GRACE_PERIOD = 4
 
 BOT_NAME = 'beagleboy'
 

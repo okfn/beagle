@@ -1,4 +1,4 @@
-# beagleboy - scrape web resources for changes and notify users by email
+# beagle - scrape web resources for changes and notify users by email
 # Copyright (C) 2013  The Open Knowledge Foundation
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,12 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from scrapy.http import Request, HtmlResponse
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from beagleboy.items import WebResource
 from scrapy import log
-import pymongo
 from hashlib import md5
+import datetime
+import pymongo
 
 class WebResourceSpider(CrawlSpider):
     """
@@ -34,10 +36,15 @@ class WebResourceSpider(CrawlSpider):
     # We define what links we should follow and that we only go "one down".
     # So we'll only look at the web page and the content of its links (not the
     # links of the links etc.
+    # Since WordPress sites link back to an ever changing wordpress.org site
+    # we don't follow those links. This is hardcoded since no other constantly
+    # changing sites are known. If there are others we will have to fish this
+    # out, and read from database (which can be set via a user interface).
     rules = [
         Rule(SgmlLinkExtractor(
                 tags=('a', 'iframe', 'object', 'embed', 'script'),
-                attrs=('href', 'src', 'data')),
+                attrs=('href', 'src', 'data'),
+                deny=('http://wordpress.org', )),
              callback='parse_start_url', follow=False)
         ]
 
@@ -64,14 +71,21 @@ class WebResourceSpider(CrawlSpider):
         start_urls. Since this is only executed in the beginning that's fine.
         """
 
+        # Get the settings from the crawler
+        settings = self.crawler.settings
+
         # Open the database and access it based on the settings
         connection = pymongo.MongoClient()
-        db = connection[self.crawler.settings.get('MONGODB_DATABASE')]
+        db = connection[settings.get('MONGODB_DATABASE')]
 
         # We use the aggregation framework to get all of the sites urls
+        # We only grab the active sites where there is a url
         pipeline = [
-            {'$unwind': '$sites'}, 
-            {'$group':{'_id':'all', 'sites': {'$addToSet':'$sites.url'}}}
+            {'$unwind': '$sites'},
+            {'$match': {'sites.active':True,
+                        'sites.url':{'$ne':None}}
+             },
+            {'$group': {'_id':'all', 'sites': {'$addToSet':'$sites.url'}}}
             ]
 
         results = db.users.aggregate(pipeline)
@@ -79,7 +93,39 @@ class WebResourceSpider(CrawlSpider):
 
         # Since we aggregate everything into all we only need the first result
         # and the sites list in that result
-        return results['result'][0]['sites']
+        if len(results['result']):
+            # We set these start urls as seen here to avoid crawling them
+            # again later, we use this to our benefit in the pipeline where
+            # it removes urls it finds. Since we crawl the same url multiple
+            # times and only remove it once it is therefore marked as a change
+            self.seen = set([s.rstrip('/') for s in results['result'][0]['sites']])
+            return results['result'][0]['sites']
+        else:
+            return []
+
+    def _requests_to_follow(self, response):
+        """
+        Overwritten _requests_to_follow since we want to use a global seen
+        and not a new one everytime so we won't follow the same urls again
+        """
+
+        if not isinstance(response, HtmlResponse):
+            return
+
+        for n, rule in enumerate(self._rules):
+            # We only add links which have never been seen
+            # We need to rstrip / because we don't know if the links have
+            # a trailing slash
+            links = [l for l in rule.link_extractor.extract_links(response)\
+                         if l.url.rstrip('/') not in self.seen]
+            if links and rule.process_links:
+                links = rule.process_links(links)
+            # Update self.seen - we add the url only (remove trailing slash)
+            self.seen = self.seen.union([l.url.rstrip('/') for l in links])
+            for link in links:
+                r = Request(url=link.url, callback=self._response_downloaded)
+                r.meta.update(rule=n, link_text=link.text)
+                yield rule.process_request(r)
         
     def parse_start_url(self, response):
         """

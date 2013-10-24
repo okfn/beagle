@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# beagleboy - scrape web resources for changes and notify users by email
+# beagle - scrape web resources for changes and notify users by email
 # Copyright (C) 2013  The Open Knowledge Foundation
 #
 # This program is free software: you can redistribute it and/or modify
@@ -40,11 +40,11 @@ class UpdateChecker(object):
         # We will need to hold all checksums and changes until the spider
         # is closed (so we won't access the database for every item)
         self.checksums = defaultdict(set)
-        self.changes = defaultdict(list)        
+        self.changes = defaultdict(list)
 
         # Open up the database connection
         settings = spider.crawler.settings
-        log.msg(spider.crawler.settings)
+
         self.connection = yield txmongo.MongoConnection()
         self.db = self.connection[settings.get('MONGODB_DATABASE')]
 
@@ -108,13 +108,9 @@ class UpdateChecker(object):
             yield self.db.checksums.remove({
                     'site':site, 'checksum': {'$in': list(checksums)}})
 
-        # We need to create a set of sites from changed and removed sites
-        sites = set(self.changes.keys())
-        sites.update(self.checksums.keys())
-
-        # We loop through the sites that have been changed or removed to
+        # We loop through the sites that have been changed to
         # send emails to the user watching them and update its time.
-        for site in sites:
+        for site in set(self.changes.keys()):
             # Get the user that watches this dataset
             user = yield self.db.users.find_one({'sites.url':site})
             if user is None:

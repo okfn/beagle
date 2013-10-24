@@ -75,7 +75,9 @@ class WebResourceSpider(CrawlSpider):
         settings = self.crawler.settings
 
         # Open the database and access it based on the settings
-        connection = pymongo.MongoClient()
+        connection = pymongo.MongoClient(
+            settings.get('MONGODB_HOST', 'localhost'),
+            settings.get('MONGODB_PORT', 27017))
         db = connection[settings.get('MONGODB_DATABASE')]
 
         # We use the aggregation framework to get all of the sites urls

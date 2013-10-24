@@ -19,7 +19,9 @@ MAIL_PASS = ''
 
 # MongoDB configurations (collections are automatic so we only need the
 # database name
+MONGODB_HOST = 'localhost' # or 'mongodb://username:password@server.tld/db'
 MONGODB_DATABASE = 'beagle'
+MONGODB_PORT = 27017
 
 # Number of weeks to run checks and reminders after publication date
 # i.e. to send out emails

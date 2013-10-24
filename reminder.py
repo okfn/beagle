@@ -42,7 +42,8 @@ def get_users():
     grace_period = today - datetime.timedelta(weeks=grace_weeks)
 
     # Connect to the MongoDB account
-    connection = pymongo.MongoClient()
+    connection = pymongo.MongoClient(settings.MONGODB_HOST,
+                                     settings.MONGODB_PORT)
     db = connection[settings.MONGODB_DATABASE]
     
     # We only grab pages that are active and within the grace period

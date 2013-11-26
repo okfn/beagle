@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gettext
+from scrapy.settings import CrawlerSettings
 from beagleboy import settings
 from scrapy.mail import MailSender
 from scrapy import log
@@ -30,54 +31,6 @@ from twisted.internet import reactor
 
 # Translations are located in the root directory
 gettext.install('beagle', 'locale', unicode=True)
-
-class BeagleSender(MailSender):
-    """
-    Class that inherits from scrapy's MailSender only to set charset as utf-8.
-    The only method overwritten is send, where we add charset='utf-8' to
-    either the MIMEText instance or the payload of a MIMENonMultipart instance
-    """
-
-    def send(self, to, subject, body, cc=None, attachs=(), _callback=None):
-        if attachs:
-            msg = MIMEMultipart()
-        else:
-            msg = MIMENonMultipart('text', 'plain')
-        msg['From'] = self.mailfrom
-        msg['To'] = COMMASPACE.join(to)
-        msg['Date'] = formatdate(localtime=True)
-        msg['Subject'] = subject
-        rcpts = to[:]
-        if cc:
-            rcpts.extend(cc)
-            msg['Cc'] = COMMASPACE.join(cc)
-
-        if attachs:
-            msg.attach(MIMEText(body, charset='utf-8'))
-            for attach_name, mimetype, f in attachs:
-                part = MIMEBase(*mimetype.split('/'))
-                part.set_payload(f.read())
-                Encoders.encode_base64(part)
-                part.add_header('Content-Disposition', 'attachment; filename="%s"' \
-                    % attach_name)
-                msg.attach(part)
-        else:
-            msg.set_payload(body, charset='utf-8')
-
-        if _callback:
-            _callback(to=to, subject=subject, body=body, cc=cc, attach=attachs, msg=msg)
-
-        if self.debug:
-            log.msg(format='Debug mail sent OK: To=%(mailto)s Cc=%(mailcc)s Subject="%(mailsubject)s" Attachs=%(mailattachs)d',
-                    level=log.DEBUG, mailto=to, mailcc=cc, mailsubject=subject, mailattachs=len(attachs))
-            return
-
-        dfd = self._sendmail(rcpts, msg.as_string())
-        dfd.addCallbacks(self._sent_ok, self._sent_failed,
-            callbackArgs=[to, cc, subject, len(attachs)],
-            errbackArgs=[to, cc, subject, len(attachs)])
-        reactor.addSystemEventTrigger('before', 'shutdown', lambda: dfd)
-        return dfd
 
 class Email(object):
     """
@@ -97,11 +50,12 @@ class Email(object):
 
         self.recipient = recipient
         self.site = site
-        
+        log.msg(str(recipient))
         # Install the translation and default to english
-        user_locale = gettext.translation(
-            'beagle', 'locale',languages=[recipient.get('lang', 'en')])
-        user_locale.install(unicode=True)
+        if recipient['lang']:
+            user_locale = gettext.translation(
+                'beagle', 'locale', languages=[recipient.get('lang')])
+            user_locale.install(unicode=True)
 
     @property
     def content(self):
@@ -132,11 +86,35 @@ class Email(object):
 
     def send(self):
         """
-        Send the email to the recipient (via BeagleSender to force utf-8
-        charset for the email
+        Send the email to the recipient
         """
-        mailer = BeagleSender()
-	subject = _(u'A web page you are watching has changed')
-        mailer.send(to=[self.recipient['email']],
-                    subject=subject, body=self.content)
+        import smtplib
+        from email.mime.text import MIMEText
 
+        crawl_settings = CrawlerSettings(settings)
+        # Get mail host or localhost
+        host = crawl_settings.get('MAIL_HOST', 'localhost')
+        port = crawl_settings.getint('MAIL_PORT', 25)
+        sender = crawl_settings.get('MAIL_FROM', None)
+        # Get sender or return
+        if not sender:
+            return
+        # Get username and password for the mail server
+        sender_user = crawl_settings.get('MAIL_USER', None)
+        sender_pass = crawl_settings.get('MAIL_PASS', None)
+    
+        # Connect to the SMTP host and log in if necessary
+        server = smtplib.SMTP(host, port)
+        if sender_user and sender_pass:
+            server.login(sender_user, sender_pass)
+
+        # Create the email message
+        msg = MIMEText(self.content, _charset='utf-8')
+        msg['From'] = sender
+        msg['To'] = self.recipient['email']
+        msg['Subject'] = _(u'A web page you are watching has changed')
+
+        # Send the email
+        server.sendmail(sender, [self.recipient['email']], msg.as_string())
+
+        server.quit()

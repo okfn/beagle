@@ -19,15 +19,18 @@ import gettext
 import pymongo
 import smtplib
 import datetime
+from scrapy.settings import CrawlerSettings
+
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 # We reuse the email settings from beagleboy
-from beagleboy import settings
+import beagleboy.settings
 
 # Translations are located in the root directory
 gettext.install('beagle', 'locale', unicode=True)
 
-def get_users():
+def get_users(settings):
     """
     Get users from the database who's sites fall within the grace period
     and return them in a list with email addresses, names, preferred language,
@@ -38,24 +41,29 @@ def get_users():
     # find all pages which should be getting reminder emails (they get
     # reminders every week during the grace period)
     today = datetime.datetime.today()
-    grace_weeks = settings.PUBLICATION_GRACE_PERIOD
+    grace_weeks = settings.getint('PUBLICATION_GRACE_PERIOD', 4)
     grace_period = today - datetime.timedelta(weeks=grace_weeks)
 
     # Connect to the MongoDB account
-    connection = pymongo.MongoClient(settings.MONGODB_HOST,
-                                     settings.MONGODB_PORT)
-    db = connection[settings.MONGODB_DATABASE]
+    connection = pymongo.MongoClient(settings.get('MONGODB_HOST', 'localhost'),
+                                     settings.getint('MONGODB_PORT', 27017))
+    db = connection[settings.get('MONGODB_DATABASE', 'beagle')]
     
     # We only grab pages that are active and within the grace period
     # Information we need are email, name, and language
     pipeline = [
         {'$unwind': '$sites'},
+        {'$unwind': '$sites.publication_dates'},
         {'$match': {'sites.active': True,
-                    'sites.publication_dates': {'$gte':grace_period,
-                                                '$lte':today}}
+                    'sites.publication_dates._d': {'$gte':grace_period,
+                                                   '$lte':today}}
          },
         {'$group': {'_id': {'email': '$_id','name':'$name','lang':'$language'}, 
-                    'sites': {'$addToSet': '$sites.title'}}
+                    'sites': {
+                    '$addToSet': {'title':'$sites.title',
+                                  'date':'$sites.publication_dates._d'}
+                              }
+                    }
          }
         ]
 
@@ -67,49 +75,84 @@ def get_users():
              'sites':user['sites']}\
                 for user in results['result']]
 
+def get_message_content(name, date, site, _format='plain'):
+    """
+    Get email contents either as plain text of html format
+    """
+
+    # Format date to show year and month
+    date = date.strftime('%Y-%m-%d')
+
+    # If request format is html we wrap date and site title in a strong tag
+    if _format == 'html':
+        emphasis = '<strong>{0}</strong>'
+        date = emphasis.format(date)
+        site = emphasis.format(site)
+
+    # Email body content
+    greeting = _(u"Hi {person}!").format(person=name)
+    reminder = _(u"This is just a friendly reminder that according to your country's budget calendar one of the budget documents you're assigned to track should have been released by {date}. If you have already checked the relevant web page and reported on the Tracker that it has been released, then you can ignore this message. If not, then please check if it has been released.").format(date=date)
+    site_listing = _(u"The specific document that you are looking for is: {site}.").format(site=site)
+
+    if _format == 'html':
+        wrapper = u'<html><head></head><body><p>{0}</p></body></html>'
+        body = u'</p><p>'.join([greeting, reminder, site_listing])
+        return wrapper.format(body)
+    else:
+        return u'\n\n'.join([greeting, reminder, site_listing])
+
 def send_emails():
     # Get mail host or localhost
-    host = settings.MAIL_HOST
-    if not host:
-        host = 'localhost'
-
+    settings = CrawlerSettings(beagleboy.settings)
+    host = settings.get('MAIL_HOST', 'localhost')
+    port = settings.getint('MAIL_PORT', 25)
     # Get sender or return
-    sender = settings.MAIL_FROM
+    sender = settings.get('MAIL_FROM', None)
     if not sender:
         return
     # Get username and password for the mail server
-    sender_user = settings.MAIL_USER
-    sender_pass = settings.MAIL_PASS
+    sender_user = settings.get('MAIL_USER', None)
+    sender_pass = settings.get('MAIL_PASS', None)
     
     # Get users we want to send emails to
-    users = get_users()
+    users = get_users(settings)
 
     # Connect to the SMTP host and log in if necessary
-    server = smtplib.SMTP(host)
+    server = smtplib.SMTP(host, port)
     if sender_user and sender_pass:
         server.login(sender_user, sender_pass)
 
     # Loop through each user and compose an email to that user
     for user in users:
-        # Install the translation and default to english
-        user_locale = gettext.translation(
-            'beagle', 'locale',languages=[user.get('lang', 'en')])
-        user_locale.install(unicode=True)
+        if user.get('lang', None):
+            # Install the translation and default to english
+            user_locale = gettext.translation(
+                'beagle', 'locale',languages=[user.get('lang')])
+            user_locale.install(unicode=True)
+        
+        # Loop through sites the user is tracking and create plain
+        for site in user['sites']:
+            # Create the email message. We want to send in both html and
+            # plain text so we need a MIME Multipart
+            msg = MIMEMultipart('alternative')
+            msg['From'] = sender
+            msg['To'] = user['email']
+            msg['Subject'] = _('Budget Reminder: {site}').\
+                format(site=site['title'])
 
-        # Email body content
-        greeting = _(u"Hi {person}!").format(person=user['name'])
-        reminder = _(u"This is just a friendly reminder that the budget you're assigned to watch should have been released. If it has already been released then you can ignore this message. If not, then go and check if it has been released.")
-        sites = _(u"Here is what you should be specifically looking at now: {sitelist}").format(sitelist=u', '.join(user['sites']))
+            # Get plain and html content and attach them to the message
+            plain_content = get_message_content(user['name'], site['date'],
+                                                site['title'])
+            msg.attach(MIMEText(plain_content, 'plain', _charset='utf-8'))
+            html_content = get_message_content(user['name'], site['date'],
+                                                site['title'], _format='html')
+            msg.attach(MIMEText(html_content, 'html', _charset='utf-8'))
 
-        content = u'\n\n'.join([greeting, reminder, sites])
+            # Send the email
+            server.sendmail(sender, [user['email']], msg.as_string())
 
-        # Create the email message
-        msg = MIMEText(content, _charset='utf-8')
-        msg['From'] = sender
-        msg['To'] = user['email']
-        msg['Subject'] = _('Budget Reminder')
+        server.quit()
 
-        # Send the email
-        server.sendmail(sender, [user['email']], msg.as_string())
+if __name__ == '__main__':
+    send_emails()
 
-    server.quit()

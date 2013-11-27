@@ -1,0 +1,21 @@
+{% trans site=site %}Budget Reminder: {{ site }}{% endtrans %}
+{% if output == 'html' -%}
+<html>
+<head></head>
+<body>
+{%- endif %}
+{%- if output == 'html' %}<p>{% endif %}{% trans researcher=researcher %}Hi {{ researcher }}!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans date=date.strftime('%Y-%m-%d') %}This is just a friendly reminder that according to your country's budget calendar one of the budget documents you're assigned to track should have been released by {{ date }}.{% endtrans %} {% trans %}If you have already checked the relevant web page and reported on the Tracker that it has been released, then you can ignore this message. If not, then please check if it has been released.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans site=site%}The specific document that you are looking for is:{% endtrans %} 
+{%- if output == 'html' %} <strong>{% else %} {% endif -%}
+{{ site }}
+{%- if output == 'html' %}</strong>.</p>{% else %}.{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}Thank you, and best wishes from IBP's "Open Budget Survey Tracker" team.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{%- if output == 'html' -%}
+</body>
+</html>
+{%- endif %}

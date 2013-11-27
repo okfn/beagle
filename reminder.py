@@ -17,12 +17,9 @@
 
 import gettext
 import pymongo
-import smtplib
 import datetime
 from scrapy.settings import CrawlerSettings
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from beaglemail import sender, template
 
 # We reuse the email settings from beagleboy
 import beagleboy.settings
@@ -75,83 +72,29 @@ def get_users(settings):
              'sites':user['sites']}\
                 for user in results['result']]
 
-def get_message_content(name, date, site, _format='plain'):
-    """
-    Get email contents either as plain text of html format
-    """
-
-    # Format date to show year and month
-    date = date.strftime('%Y-%m-%d')
-
-    # If request format is html we wrap date and site title in a strong tag
-    if _format == 'html':
-        emphasis = '<strong>{0}</strong>'
-        date = emphasis.format(date)
-        site = emphasis.format(site)
-
-    # Email body content
-    greeting = _(u"Hi {person}!").format(person=name)
-    reminder = _(u"This is just a friendly reminder that according to your country's budget calendar one of the budget documents you're assigned to track should have been released by {date}. If you have already checked the relevant web page and reported on the Tracker that it has been released, then you can ignore this message. If not, then please check if it has been released.").format(date=date)
-    site_listing = _(u"The specific document that you are looking for is: {site}.").format(site=site)
-
-    if _format == 'html':
-        wrapper = u'<html><head></head><body><p>{0}</p></body></html>'
-        body = u'</p><p>'.join([greeting, reminder, site_listing])
-        return wrapper.format(body)
-    else:
-        return u'\n\n'.join([greeting, reminder, site_listing])
-
 def send_emails():
-    # Get mail host or localhost
+    # Get users we want to send emails to and create the emailer
+    # We piggyback on the beagleboy settings by loading and using them
     settings = CrawlerSettings(beagleboy.settings)
-    host = settings.get('MAIL_HOST', 'localhost')
-    port = settings.getint('MAIL_PORT', 25)
-    # Get sender or return
-    sender = settings.get('MAIL_FROM', None)
-    if not sender:
-        return
-    # Get username and password for the mail server
-    sender_user = settings.get('MAIL_USER', None)
-    sender_pass = settings.get('MAIL_PASS', None)
-    
-    # Get users we want to send emails to
     users = get_users(settings)
-
-    # Connect to the SMTP host and log in if necessary
-    server = smtplib.SMTP(host, port)
-    if sender_user and sender_pass:
-        server.login(sender_user, sender_pass)
+    emailer = sender.Emailer(settings)
 
     # Loop through each user and compose an email to that user
     for user in users:
-        if user.get('lang', None):
-            # Install the translation and default to english
-            user_locale = gettext.translation(
-                'beagle', 'locale',languages=[user.get('lang')])
-            user_locale.install(unicode=True)
-        
         # Loop through sites the user is tracking and create plain
         for site in user['sites']:
-            # Create the email message. We want to send in both html and
-            # plain text so we need a MIME Multipart
-            msg = MIMEMultipart('alternative')
-            msg['From'] = sender
-            msg['To'] = user['email']
-            msg['Subject'] = _('Budget Reminder: {site}').\
-                format(site=site['title'])
 
             # Get plain and html content and attach them to the message
-            plain_content = get_message_content(user['name'], site['date'],
-                                                site['title'])
-            msg.attach(MIMEText(plain_content, 'plain', _charset='utf-8'))
-            html_content = get_message_content(user['name'], site['date'],
-                                                site['title'], _format='html')
-            msg.attach(MIMEText(html_content, 'html', _charset='utf-8'))
+            # The template needs site title and expected publication date
+            params = {'researcher':user['name'],
+                      'date':site['date'],
+                      'site':site['title']}
+            # We set html to True because we want both plain and html versions
+            (plain, html) = template.render('scraper.email', params,
+                                            user.get('lang', None), html=True)
 
-            # Send the email
-            server.sendmail(sender, [user['email']], msg.as_string())
-
-        server.quit()
+            # Send the email with our emailer
+            emailer.send(user['email'], plain, html_content=html)
 
 if __name__ == '__main__':
     send_emails()

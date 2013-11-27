@@ -19,8 +19,8 @@ import txmongo
 import datetime
 from collections import defaultdict
 from scrapy import log
+from beaglemail import sender, template
 from twisted.internet import defer
-from beagleboy.messages import Email
 
 class UpdateChecker(object):
     """
@@ -110,6 +110,9 @@ class UpdateChecker(object):
 
         # We loop through the sites that have been changed to
         # send emails to the user watching them and update its time.
+        # But first we create an emailer out of our settings
+        emailer = sender.Emailer(spider.settings)
+
         for site in set(self.changes.keys()):
             # Get the user that watches this dataset
             user = yield self.db.users.find_one({'sites.url':site})
@@ -117,10 +120,17 @@ class UpdateChecker(object):
                 continue
 
             # Send an email to that user
-            email = Email({'name':user['name'],
-                            'email': user['_id'],
-                            'lang': user['language']}, site)
-            email.send()
+            # Get plain and html content to send with the emailer
+            # The scraper email uses docurl for the site url and 
+            # appurl to show where the form is
+            params = {'researcher':user['name'], 'docurl':site,
+                      'appurl':spider.settings.get('FORM_URL', '')}
+            # We set html to True because we want both plain and html versions
+            (plain, html) = template.render('scraper.email', params,
+                                            user.get('language', None),
+                                            html=True)
+
+            emailer.send(user['_id'], plain, html_content=html)
 
             # Update the last_changed for that particular site in the user's
             # list of sites

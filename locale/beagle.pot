@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-10-24 10:47+0000\n"
+"POT-Creation-Date: 2013-11-27 14:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,46 +17,75 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: reminder.py:99 beagleboy/messages.py:119
-msgid "Hi {person}!"
+#: beaglemail/templates/reminder.email:1
+#, python-format
+msgid "Budget Reminder: %(site)s"
 msgstr ""
 
-#: reminder.py:100
+#: beaglemail/templates/reminder.email:7 beaglemail/templates/scraper.email:7
+#, python-format
+msgid "Hi %(researcher)s!"
+msgstr ""
+
+#: beaglemail/templates/reminder.email:9
+#, python-format
 msgid ""
-"This is just a friendly reminder that the budget you're assigned to watch"
-" should have been released. If it has already been released then you can "
-"ignore this message. If not, then go and check if it has been released."
+"This is just a friendly reminder that according to your country's budget "
+"calendar one of the budget documents you're assigned to track should have"
+" been released by %(date)s."
 msgstr ""
 
-#: reminder.py:101
-msgid "Here is what you should be specifically looking at now: {sitelist}"
-msgstr ""
-
-#: reminder.py:109
-msgid "Budget Reminder"
-msgstr ""
-
-#: beagleboy/messages.py:122
+#: beaglemail/templates/reminder.email:9
 msgid ""
-"A web page you're assigned to watch ({site_url}) has been modified. Can "
-"you go and check if there is some new, relevant information on the site "
-"or if important information has been removed?"
+"If you have already checked the relevant web page and reported on the "
+"Tracker that it has been released, then you can ignore this message. If "
+"not, then please check if it has been released."
 msgstr ""
 
-#: beagleboy/messages.py:125
-msgid ""
-"Sometimes the changes are not relevant to what you're assigned to look at"
-" (and often they're not even visible), but we cannot easily check for "
-"context so we notify you everytime anything happens."
+#: beaglemail/templates/reminder.email:11
+msgid "The specific document that you are looking for is:"
 msgstr ""
 
-#: beagleboy/messages.py:127
-msgid ""
-"If you notice any relevant modifications, please use the form at "
-"{form_url} to update the information about the web page."
+#: beaglemail/templates/reminder.email:16 beaglemail/templates/scraper.email:23
+msgid "Thank you, and best wishes from IBP's \"Open Budget Survey Tracker\" team."
 msgstr ""
 
-#: beagleboy/messages.py:139
+#: beaglemail/templates/scraper.email:1
 msgid "A web page you are watching has changed"
+msgstr ""
+
+#: beaglemail/templates/scraper.email:10 beaglemail/templates/scraper.email:12
+#, python-format
+msgid ""
+"Please be aware that the web page where your government posts (or should "
+"post) the key budget documents you are tracking (%(url)s) has been "
+"modified. Would you please check the web page to see if the government "
+"has posted some new, relevant information (i.e., a key budget document), "
+"or if it has removed important information?"
+msgstr ""
+
+#: beaglemail/templates/scraper.email:15
+msgid ""
+"Please note that sometimes changes are made to these web pages that do "
+"not relate to the key budget documents that you are tracking, which may "
+"be the case in this instance. However, the current notification system "
+"for the Tracker is not able to easily determine \"relevance,\" so it will"
+" notify you every time anything on the web page it monitors changes."
+msgstr ""
+
+#: beaglemail/templates/scraper.email:15
+msgid ""
+"Since there is no way for us to know whether changes relate to the "
+"documents you are tracking, we thank you for your patience in checking "
+"the web page every time you receive an email like this one."
+msgstr ""
+
+#: beaglemail/templates/scraper.email:18 beaglemail/templates/scraper.email:20
+#, python-format
+msgid ""
+"If you notice any relevant modifications (for example, a new key budget "
+"document has been posted or removed), please use the form at %(url)s to "
+"update the information about the public availability of the key budget "
+"document."
 msgstr ""
 

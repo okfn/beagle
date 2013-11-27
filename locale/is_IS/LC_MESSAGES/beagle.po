@@ -7,72 +7,125 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-10-24 10:47+0000\n"
-"PO-Revision-Date: 2013-10-24 10:53-0000\n"
+"POT-Creation-Date: 2013-11-27 14:05+0000\n"
+"PO-Revision-Date: 2013-11-27 13:53+0000\n"
 "Last-Translator: Tryggvi Björgvinsson <tryggvi.bjorgvinsson@mrn.is>\n"
 "Language-Team: is_IS <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
-"X-Generator: Poedit 1.5.4\n"
 
-#: reminder.py:99 beagleboy/messages.py:119
-msgid "Hi {person}!"
-msgstr "Halló {person}!"
+#: beaglemail/templates/reminder.email:1
+#, python-format
+msgid "Budget Reminder: %(site)s"
+msgstr "Fjárlagafrumvarpsáminnig: %(site)s"
 
-#: reminder.py:100
+#: beaglemail/templates/reminder.email:7 beaglemail/templates/scraper.email:7
+#, python-format
+msgid "Hi %(researcher)s!"
+msgstr "Halló %(researcher)s!"
+
+#: beaglemail/templates/reminder.email:9
+#, python-format
 msgid ""
-"This is just a friendly reminder that the budget you're assigned to watch "
-"should have been released. If it has already been released then you can "
-"ignore this message. If not, then go and check if it has been released."
+"This is just a friendly reminder that according to your country's budget "
+"calendar one of the budget documents you're assigned to track should have"
+" been released by %(date)s."
 msgstr ""
-"Þetta er bara vinsamleg áminning um að fjármálaáætlun sem þú sérð um að "
-"fylgjast með ætti að hafa verið gefin út. Ef hún hefur nú þegar verið birt "
-"þá getur þú hunsað þessi skilaboð. Ef ekki þá ættir þú að fara og athuga "
-"hvort það sé búið að birta áætlunina."
+"Þetta er bara vinsamleg áminning um að samkvæmt fjárlagadagatali þíns "
+"lands ætti eitt af fjárlagaskjölunum sem þér hefur verið úthlutað að "
+"fylgjast með verið gefið út fyrir %(date)s."
 
-#: reminder.py:101
-msgid "Here is what you should be specifically looking at now: {sitelist}"
-msgstr "Hér er það sem þú ættir sérstaklega að vera að líta á núna: {sitelist}"
-
-#: reminder.py:109
-msgid "Budget Reminder"
-msgstr "Áminning vegna fjármálaáætlunar"
-
-#: beagleboy/messages.py:122
+#: beaglemail/templates/reminder.email:9
 msgid ""
-"A web page you're assigned to watch ({site_url}) has been modified. Can you "
-"go and check if there is some new, relevant information on the site or if "
-"important information has been removed?"
+"If you have already checked the relevant web page and reported on the "
+"Tracker that it has been released, then you can ignore this message. If "
+"not, then please check if it has been released."
 msgstr ""
-"Vefsíðu sem þú sérð um að fylgjast með ({site_url}) hefur verið breytt. "
-"Getur þú farið og athugað hvort það séu einhverjar nýjar, viðeigandi "
-"upplýsingar á síðunni eða hvort mikilvægar upplýsingar hafa verið fjarlægðar?"
+"Ef þú hefur nú þegar athugað vefsíðuna og skráð á vefsíðuna að það hefur "
+"verið birt getur þú hunsað þessi skilaboð. Ef ekki þá vinsamlegast "
+"athugaðu ef það hefur verið birt."
 
-#: beagleboy/messages.py:125
-msgid ""
-"Sometimes the changes are not relevant to what you're assigned to look at "
-"(and often they're not even visible), but we cannot easily check for context "
-"so we notify you everytime anything happens."
+#: beaglemail/templates/reminder.email:11
+msgid "The specific document that you are looking for is:"
+msgstr "Skjalið sem þú ert að leita að er:"
+
+#: beaglemail/templates/reminder.email:16 beaglemail/templates/scraper.email:23
+msgid "Thank you, and best wishes from IBP's \"Open Budget Survey Tracker\" team."
 msgstr ""
-"Stundum eru breytingarnar ekki viðeigandi fyrir verkefnið sem þú sérð um (og "
-"oft getur maður ekki séð breytingarnar) en þar sem við getum ekki "
-"auðveldlega skoðað innihald látum við þig vita í hvert skipti sem eitthvað "
-"breytist"
+"Takk fyrir og bestu kveðjur frá \"Open Budget Survey Tracker\" teyminu "
+"hjá IBP."
 
-#: beagleboy/messages.py:127
-msgid ""
-"If you notice any relevant modifications, please use the form at {form_url} "
-"to update the information about the web page."
-msgstr ""
-"Ef þú tekur eftir viðeigandi breytingum, vinsamlegast notaðu þú formið á "
-"{form_url} til að uppfæra upplýsingarnar um vefsíðuna."
-
-#: beagleboy/messages.py:139
+#: beaglemail/templates/scraper.email:1
 msgid "A web page you are watching has changed"
 msgstr "Vefsíðu sem þú fylgist með hefur verið breytt"
 
+#: beaglemail/templates/scraper.email:10 beaglemail/templates/scraper.email:12
+#, python-format
+msgid ""
+"Please be aware that the web page where your government posts (or should "
+"post) the key budget documents you are tracking (%(url)s) has been "
+"modified. Would you please check the web page to see if the government "
+"has posted some new, relevant information (i.e., a key budget document), "
+"or if it has removed important information?"
+msgstr ""
+"Vinsamlegast athugaðu að vefsíðan þar sem stjórnvöldin þín setja inn (eða"
+" ættu að setja inn) lykilfjárlagaskjal og þú fylgist með(%(url)s) hefur "
+"verið breytt. Værir þú vinsamlegast til í að athuga vefsíðuna og sjá "
+"hvort stjórnvöld hafi sett inn nýjar, viðeigandi upplýsingar (t.d. "
+"lykilfjárlagaskjal), eða ef mikilvægar upplýsingar hafa verið fjarlægðar?"
+
+#: beaglemail/templates/scraper.email:15
+msgid ""
+"Please note that sometimes changes are made to these web pages that do "
+"not relate to the key budget documents that you are tracking, which may "
+"be the case in this instance. However, the current notification system "
+"for the Tracker is not able to easily determine \"relevance,\" so it will"
+" notify you every time anything on the web page it monitors changes."
+msgstr ""
+"Vinsamlegast hafðu í huga að stundum eru gerðar breytingar á vefsíðum sem"
+" koma lykilfjárlagaskjal sem þú fylgist með ekkert við og það gæti verið "
+"svo í þessu tilfelli. Því miður getur viðvörunarkerfi vefsíðunnar ekki "
+"auðveldlega séð hversu \"viðeigandi\" breytingarnar eru þannig að það mun"
+" láta þig vita í hvert skipti sem eitthvað á vefsíðunni breytist."
+
+#: beaglemail/templates/scraper.email:15
+msgid ""
+"Since there is no way for us to know whether changes relate to the "
+"documents you are tracking, we thank you for your patience in checking "
+"the web page every time you receive an email like this one."
+msgstr ""
+"Þar sem það er engin leið fyrir okkur að vita hvort breytingarnar tengist"
+" skjalinu sem þú fylgist með, þökkum við þér fyrir þolinmæðina í að "
+"athuga vefsíðurnar í hvert skipti sem þú færð tölvupóst eins og þennan."
+
+#: beaglemail/templates/scraper.email:18 beaglemail/templates/scraper.email:20
+#, python-format
+msgid ""
+"If you notice any relevant modifications (for example, a new key budget "
+"document has been posted or removed), please use the form at %(url)s to "
+"update the information about the public availability of the key budget "
+"document."
+msgstr ""
+"Ef þú tekur eftir einhverjum viðeigandi breytingum (til dæmis ef nýju "
+"fjárlagaskjali hefur verið bætt við eða það fjarlægt), vinsamlegast "
+"notaðu þá formið á %(url)s til að uppfæra upplýsingarnar um aðgengi að "
+"lykilfjárlagaskjalinu."
+
 #~ msgid "Budget page modified"
 #~ msgstr "Fjárlagasíðu breytt"
+
+#~ msgid ""
+#~ msgstr ""
+
+#~ msgid "Here is what you should be specifically looking at now: {sitelist}"
+#~ msgstr ""
+
+#~ msgid "Budget Reminder"
+#~ msgstr "Áminning vegna fjármálaáætlunar"
+
+#~ msgid "Hi {person}!"
+#~ msgstr "Halló {person}!"
+

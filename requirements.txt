@@ -1,5 +1,7 @@
 APScheduler==2.1.1
 Babel==1.3
+Jinja2==2.7.1
+MarkupSafe==0.18
 Scrapy==0.18.2
 Twisted==13.1.0
 argparse==1.2.1

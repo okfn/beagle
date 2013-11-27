@@ -1,0 +1,28 @@
+{% trans %}A web page you are watching has changed{% endtrans %}
+{% if output == 'html' -%}
+<html>
+<head></head>
+<body>
+{%- endif -%}
+{% if output == 'html' %}<p>{% endif %}{% trans %}Hi {{ researcher }}!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}
+<p>{% trans url=docurl|urlize %}Please be aware that the web page where your government posts (or should post) the key budget documents you are tracking ({{ url }}) has been modified. Would you please check the web page to see if the government has posted some new, relevant information (i.e., a key budget document), or if it has removed important information?{% endtrans %}</p>
+{% else %}
+{% trans url=docurl %}Please be aware that the web page where your government posts (or should post) the key budget documents you are tracking ({{ url }}) has been modified. Would you please check the web page to see if the government has posted some new, relevant information (i.e., a key budget document), or if it has removed important information?{% endtrans %}
+{%- endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}Please note that sometimes changes are made to these web pages that do not relate to the key budget documents that you are tracking, which may be the case in this instance. However, the current notification system for the Tracker is not able to easily determine "relevance," so it will notify you every time anything on the web page it monitors changes.{% endtrans%} {% trans %}Since there is no way for us to know whether changes relate to the documents you are tracking, we thank you for your patience in checking the web page every time you receive an email like this one.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' -%}
+<p>{% trans url=appurl|urlize %}If you notice any relevant modifications (for example, a new key budget document has been posted or removed), please use the form at {{ url }} to update the information about the public availability of the key budget document.{% endtrans %}</p>
+{%- else -%}
+{% trans url=appurl %}If you notice any relevant modifications (for example, a new key budget document has been posted or removed), please use the form at {{ url }} to update the information about the public availability of the key budget document.{% endtrans %}
+{%- endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}Thank you, and best wishes from IBP's "Open Budget Survey Tracker" team.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' -%}
+</body>
+</html>
+{% endif %}

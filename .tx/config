@@ -1,0 +1,9 @@
+[main]
+host = https://www.transifex.com
+
+[open-budget-tracker.beagle]
+file_filter = locale/<lang>/LC_MESSAGES/beagle.po
+source_file = locale/beagle.pot
+type = PO
+source_lang = en
+

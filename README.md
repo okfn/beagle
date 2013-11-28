@@ -1,6 +1,10 @@
 # Beagle
 
-Beagle is software used to track changes to web resources and send out reminder emails. It reads site urls from a MongoDB database and runs a scraper (called beagleboy) to check if the sites have changed. It also looks at resources linked to by the site (in case content is being served with an iframe, swf file etc.
+Beagle is software used to track changes to web resources and send out reminder emails. It reads site urls from a MongoDB database and runs a scraper (called beagleboy) to check if the sites have changed. It also looks at resources linked to by the site (in case content is being served with an iframe, swf file etc.).
+
+Beagle is intended to be a backend service that reminds users and saves changes into a database. A front end service manages the rest of the user facing service by working from the same database.
+
+The front end service that has been developed in collaboration with Beagle is [Aquarium](http://github.com/okfn/aquarium).
 
 ## Installation
 

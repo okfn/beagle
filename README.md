@@ -76,7 +76,7 @@ This sends out regular reminder emails (once per week) around the dates of publi
 
 Beagle sends out emails to users to notify them of changes or as reminders. These emails are handled by *beaglemail* and the email templates can be found in a directory called *templates* as part of the *beaglemail* module and use the *.email* suffix.
 
-The email templates are based on (jinja2)[http://jinja.pocoo.org/2/] but have some noteworthy *quirks*:
+The email templates are based on [jinja2](http://jinja.pocoo.org/2/) but have some noteworthy *quirks*:
 
 * First line is always the subject line the remaining lines are the body
 * A template parameter called *output* can be set to *html* to ask for html email output

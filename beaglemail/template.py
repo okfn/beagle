@@ -20,6 +20,9 @@ from jinja2 import Environment, PackageLoader
 from scrapy.settings import CrawlerSettings
 import beagleboy.settings
 
+# Translations are located in the root directory
+gettext.install('beagle', '../locale', unicode=True)
+
 def render(path, params={}, locale=None, html=False):
     """
     Render a template with parameters but get the owner from the beagleboy
@@ -32,9 +35,11 @@ def render(path, params={}, locale=None, html=False):
 
     # If locale has been provided we install the translation
     if locale:
-        translation = gettext.translation('beagle', 'locale',
-                                          languages=[locale])
+        translation = gettext.translation('beagle', '../locale',
+                                          languages=[locale],
+                                          fallback=True)
         env.install_gettext_translations(translation)
+
 
     # Get the template from the path
     template = env.get_template(path)

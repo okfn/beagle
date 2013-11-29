@@ -18,10 +18,9 @@ from scrapy.http import Request, HtmlResponse
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from beagleboy.items import WebResource
+from db.collections import Users
 from scrapy import log
 from hashlib import md5
-import datetime
-import pymongo
 
 class WebResourceSpider(CrawlSpider):
     """
@@ -54,7 +53,13 @@ class WebResourceSpider(CrawlSpider):
         Get the start_urls for the spider. These are fetched from a
         database using get_user_urls()
         """
-        return self.get_user_urls()
+        # Begin by creating our database user object (synchronous is ok here)
+        with Users(self.crawler.settings) as users:
+            # Then we return the urls of all users
+            urls = users.urls()
+            # We have now seen these urls so we don't have to crawl them again
+            self.seen = set([s.rstrip('/') for s in urls])
+            return urls
 
     @start_urls.setter
     def start_urls(self, value):
@@ -63,47 +68,6 @@ class WebResourceSpider(CrawlSpider):
         nothing with the value (since we will always fetch it from a database)
         """
         pass
-
-    def get_user_urls(self):
-        """
-        Get the user urls from the database (this is generated for start_urls).
-        This is a blocking operation since that's how scrapy accesses
-        start_urls. Since this is only executed in the beginning that's fine.
-        """
-
-        # Get the settings from the crawler
-        settings = self.crawler.settings
-
-        # Open the database and access it based on the settings
-        connection = pymongo.MongoClient(
-            settings.get('MONGODB_HOST', 'localhost'),
-            settings.get('MONGODB_PORT', 27017))
-        db = connection[settings.get('MONGODB_DATABASE')]
-
-        # We use the aggregation framework to get all of the sites urls
-        # We only grab the active sites where there is a url
-        pipeline = [
-            {'$unwind': '$sites'},
-            {'$match': {'sites.active':True,
-                        'sites.url':{'$ne':None}}
-             },
-            {'$group': {'_id':'all', 'sites': {'$addToSet':'$sites.url'}}}
-            ]
-
-        results = db.users.aggregate(pipeline)
-        connection.disconnect()
-
-        # Since we aggregate everything into all we only need the first result
-        # and the sites list in that result
-        if len(results['result']):
-            # We set these start urls as seen here to avoid crawling them
-            # again later, we use this to our benefit in the pipeline where
-            # it removes urls it finds. Since we crawl the same url multiple
-            # times and only remove it once it is therefore marked as a change
-            self.seen = set([s.rstrip('/') for s in results['result'][0]['sites']])
-            return results['result'][0]['sites']
-        else:
-            return []
 
     def _requests_to_follow(self, response):
         """

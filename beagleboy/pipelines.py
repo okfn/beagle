@@ -20,6 +20,7 @@ import datetime
 from collections import defaultdict
 from scrapy import log
 from beaglemail import sender, template
+from db.collections import Users, Checksums
 from twisted.internet import defer
 
 class UpdateChecker(object):
@@ -29,7 +30,6 @@ class UpdateChecker(object):
     if there are any updates.
     """
 
-    @defer.inlineCallbacks
     def open_spider(self, spider):
         """
         Called when the spider starts (but before it crawls). This method is
@@ -42,22 +42,9 @@ class UpdateChecker(object):
         self.checksums = defaultdict(set)
         self.changes = defaultdict(list)
 
-        # Open up the database connection
-        settings = spider.crawler.settings
-
-        self.connection = yield txmongo.MongoConnection()
-        self.db = self.connection[settings.get('MONGODB_DATABASE')]
-
-        # We use the aggregation framework to get all checksums for the sites
-        pipeline = [{'$group': 
-                     {'_id': '$site','checksums': {'$push': '$checksum'}} 
-                   }]
-        
-        results = yield self.db.checksums.aggregate(pipeline)
-
-        # We add the checksums as a set for the sites they belong to
-        for result in results:
-            self.checksums[result['_id']] = set(result['checksums'])
+        # Open up the database connection and update the checksums
+        with Checksums(spider.crawler.settings) as checksums:
+            self.checksums.update(checksums.all())
 
     def process_item(self, item, spider):
         """
@@ -82,60 +69,48 @@ class UpdateChecker(object):
 
         return item
 
-    @defer.inlineCallbacks
     def close_spider(self, spider):
         """
         Called when the spider closes (after the crawl). This goes through all
         changes, additions, and removals updates the database and sends out an
         email in case the sites have changes somehow
         """
+        
+        with Checksums(spider.crawler.settings) as checksums:
+            # Go through all changes and update the checksums
+            for site, urls in self.changes.iteritems():
+                for url in urls:
+                    result = checksums.update(site, url['url'], url['checksum'])
 
-        # Go through all changes and update the checksums
-        for site, urls in self.changes.iteritems():
-            for url in urls:
-                # The reason we use findAndModify is that it returns the old
-                # document. This means that if we want to check if this is a
-                # new site the result will be None and not None if it's an
-                # update to an existing url (we don't check this now)
-                result = yield self.db.checksums.find_and_modify(
-                    query={'site':site, 'url': url['url']},
-                    update={'$set':{'checksum': url['checksum']}},
-                    upsert=True)
-
-        # Remove all sites remaining in checksums dict because the are no
-        # longer accessible (not crawled)
-        for site, checksums in self.checksums.iteritems():
-            yield self.db.checksums.remove({
-                    'site':site, 'checksum': {'$in': list(checksums)}})
+            # Remove all sites remaining in checksums dict because the are no
+            # longer accessible (not crawled)
+            for site, checksum_set in self.checksums.iteritems():
+                checksums.remove(site, list(checksum_set))
 
         # We loop through the sites that have been changed to
         # send emails to the user watching them and update its time.
         # But first we create an emailer out of our settings
         emailer = sender.Emailer(spider.settings)
 
-        for site in set(self.changes.keys()):
-            # Get the user that watches this dataset
-            user = yield self.db.users.find_one({'sites.url':site})
-            if user is None:
-                continue
+        with Users(spider.crawler.settings) as users:
+            for site in set(self.changes.keys()):
+                # Get the user that watches this dataset
+                for user in users.all({'sites.url':site}):
+                    # Send an email to that user
+                    # Get plain and html content to send with the emailer
+                    # The scraper email uses docurl for the site url and 
+                    # appurl to show where the form is
+                    params = {'researcher':user['name'], 'docurl':site,
+                              'appurl':spider.settings.get('FORM_URL', '')}
+                
+                    # We set html to True because we want both plain 
+                    # and html versions
+                    (plain, html) = template.render('scraper.email', params,
+                                                    user.get('language', None),
+                                                    html=True)
 
-            # Send an email to that user
-            # Get plain and html content to send with the emailer
-            # The scraper email uses docurl for the site url and 
-            # appurl to show where the form is
-            params = {'researcher':user['name'], 'docurl':site,
-                      'appurl':spider.settings.get('FORM_URL', '')}
-            # We set html to True because we want both plain and html versions
-            (plain, html) = template.render('scraper.email', params,
-                                            user.get('language', None),
-                                            html=True)
+                    emailer.send(user['email'], plain, html_content=html)
 
-            emailer.send(user['_id'], plain, html_content=html)
-
-            # Update the last_changed for that particular site in the user's
-            # list of sites
-            yield self.db.users.update(
-                {'_id': user['_id'], 'sites.url': site},
-                {'$set': {'sites.$.last_change': datetime.datetime.now()}})
-
-        yield self.connection.disconnect()
+                # Update the last_changed for that particular site in the user's
+                # list of sites
+                users.touch(site)

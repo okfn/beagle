@@ -1,0 +1,18 @@
+{% trans %}Monthly Report Reminder{% endtrans %}
+{% if output == 'html' -%}
+<html>
+<head></head>
+<body>
+{%- endif %}
+{%- if output == 'html' %}<p>{% endif %}{% trans researcher=researcher %}Dear {{ researcher }}!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans date=date %}This is a friendly reminder that your monthly report submission for the Open Budget Survey Tracker is due this coming Friday, {{ date }}.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}The OBI team will be happy to answer any questions you may have prior to your submission, and looks forward to receiving the report!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}Many thanks, and best wishes from IBP's "Open Budget Survey Tracker" team.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{%- if output == 'html' -%}
+</body>
+</html>
+{%- endif %}

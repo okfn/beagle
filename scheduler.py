@@ -21,7 +21,7 @@ from rq import Queue
 from worker import conn
 
 from crawler import crawl_webresources
-from reminder import send_emails
+from reminder import budget_reminder, report_reminder
 from beagleboy import settings
 
 # Set up queue and scheduler
@@ -45,7 +45,44 @@ def reminders():
     a part of the implementation of the function that's enqueued here
     """
     # Enqueue via Redis queue the reminder emails
-    result = q.enqueue(send_emails)
+    result = q.enqueue(budget_reminder)
+
+@sched.cron_schedule(day='last mon')
+def report_last_monday():
+    """
+    A scheduled method to send out reminders about monthly report. These
+    reminders should be sent out on the monday before the first friday of
+    every month. This method covers the case where that monday is in the
+    previous month and is complemented by the method report_first_monday.
+    """
+
+    # Get today and the friday (which is in 4 days)
+    today = datetime.date.today()
+    friday = today + datetime.timedelta(days=4)
+    # If the friday is in the next month that's the first friday of the month
+    # because this is the last monday of this month so we send out a reminder
+    if friday.month != today.month:
+        # We send in the date when the report is due (friday)
+        result = q.enqueue(report_reminder, friday)
+
+@sched.cron_schedule(day='1st mon')
+def report_first_monday():
+    """
+    A scheduled method to send out reminders about monthly report. These
+    reminders should be sent out on the monday before the first friday of
+    every month. This method covers the case where that monday is in the
+    same month and is complemented by the method report_last_monday.
+    """
+
+    # Get today and the last friday (which is 3 days ago)
+    today = datetime.date.today()
+    friday = today - datetime.timedelta(days=3)
+    # If last friday is in the previous month the next one is the first friday
+    # of this month because this is the first monday of this month so we send
+    # out a reminder
+    if friday.month != today.month:
+        # We send in the date when the report is due (next friday)
+        result = q.enqueue(report_reminder, today+datetime.timedelta(days=4))
 
 # Start scheduling
 sched.start()

@@ -33,12 +33,16 @@ def render(path, params={}, locale=None, html=False):
     env = Environment(loader=PackageLoader('beaglemail', 'templates'),
                       extensions=['jinja2.ext.i18n'])
 
-    # If locale has been provided we install the translation
+    # If locale has been provided we install the translation else we provide
+    # a null translation
     if locale:
         translation = gettext.translation('beagle', '../locale',
                                           languages=[locale],
                                           fallback=True)
-        env.install_gettext_translations(translation)
+    else:
+        translation = gettext.NullTranslations()
+
+    env.install_gettext_translations(translation)
 
 
     # Get the template from the path

@@ -18,11 +18,12 @@
 from scrapy.settings import CrawlerSettings
 from db.collections import Users
 from beaglemail import sender, template
+from babel.dates import format_date
 
 # We reuse the email settings from beagleboy
 import beagleboy.settings
 
-def send_emails():
+def budget_reminder():
     """
     Find all users who should get a reminder and send emails to them. This
     just connects two modules (beaglemail and db) and relays the information
@@ -45,13 +46,48 @@ def send_emails():
                           'date':site['date'],
                           'site':site['title']}
                 # We set html to True because we want both plain and html
-                (plain, html) = template.render('reminder.email', params,
+                (plain, html) = template.render('budget_reminder.email',
+                                                params, 
                                                 user.get('locale', None),
                                                 html=True)
 
                 # Send the email with our emailer
                 emailer.send(user['email'], plain, html_content=html)
 
-if __name__ == '__main__':
-    send_emails()
+def report_reminder(when=None):
+    """
+    Find all users in the system that are not administrators and remind them
+    that they should hand in a report on the date specified with the when
+    parameter
+    """
 
+    # We piggyback on the beagleboy settings by loading and using them
+    settings = CrawlerSettings(beagleboy.settings)
+
+    # Get users we want to send emails to and create the emailer
+    emailer = sender.Emailer(settings)
+
+    with Users(settings) as users:
+        # Loop through each user and compose and email to that user
+        for user in users.all(filters={'admin':False}):
+            # Get plain and html content and attach them to the message
+            # The template needs the researcher name and when report is due
+            # and format the date here to make use of babel's date translations
+            # we default to english as the locale if none is found. Note that
+            # we let the template hard code the weekday instead of doing it
+            # here because of declension
+            params = {'researcher':user['name'],
+                      'date':format_date(when, format='long',
+                                         locale=user.get('language', 'en'))
+                      }
+            # We set html to True because we want both plain and html
+            (plain, html) = template.render('report_reminder.email', params,
+                                            user.get('language', None),
+                                            html=True)
+            
+            # Send the email with our emailer
+            emailer.send(user['email'], plain, html_content=html)
+
+if __name__ == '__main__':
+    import datetime
+    report_reminder(datetime.date.today()+datetime.timedelta(days=2))

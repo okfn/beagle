@@ -1,0 +1,22 @@
+{% trans %}Monthly Report due Today{% endtrans %}
+{% if output == 'html' -%}
+<html>
+<head></head>
+<body>
+{%- endif %}
+{%- if output == 'html' %}<p>{% endif %}{% trans researcher=researcher %}Dear {{ researcher }}!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' -%}
+<p>{% trans month='<strong>%s</strong>'|format(month) %}Your {{ month }} report for the Open Budget Survey Tracker is due today.{% endtrans %}</p>
+{%- else -%}
+{% trans month=month %}Your {{ month }} report for the Open Budget Survey Tracker is due today.{% endtrans %}
+{%- endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}If you have already submitted the monthly report, then you can ignore this message. If not, then please send it to us by the end of the day.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{% if output == 'html' %}<p>{% endif %}{% trans %}Thank you, and best wishes from IBP's "Open Budget Survey Tracker" team..{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+
+{%- if output == 'html' -%}
+</body>
+</html>
+{%- endif %}

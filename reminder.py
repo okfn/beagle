@@ -19,6 +19,7 @@ from scrapy.settings import CrawlerSettings
 from db.collections import Users
 from beaglemail import sender, template
 from babel.dates import format_date
+import datetime
 
 # We reuse the email settings from beagleboy
 import beagleboy.settings
@@ -40,7 +41,6 @@ def budget_reminder():
         for user in users.remindees():
             # Loop through sites the user is tracking and create plain
             for site in user['sites']:
-                # Get plain and html content and attach them to the message
                 # The template needs site title and expected publication date
                 params = {'researcher':user['name'],
                           'date':site['date'],
@@ -70,7 +70,6 @@ def report_reminder(when=None):
     with Users(settings) as users:
         # Loop through each user and compose and email to that user
         for user in users.all(filters={'admin':False}):
-            # Get plain and html content and attach them to the message
             # The template needs the researcher name and when report is due
             # and format the date here to make use of babel's date translations
             # we default to english as the locale if none is found. Note that
@@ -88,6 +87,35 @@ def report_reminder(when=None):
             # Send the email with our emailer
             emailer.send(user['email'], plain, html_content=html)
 
+def report_due():
+    """
+    Send out a notification that the report for the last month is due today
+    """
+    
+    # We piggyback on the beagleboy settings by loading and using them
+    settings = CrawlerSettings(beagleboy.settings)
+
+    # Get users we want to send emails to and create the emailer
+    emailer = sender.Emailer(settings)
+
+    with Users(settings) as users:
+        for user in users.all(filters={'admin':False}):
+            # The template needs the researcher name and when the month the
+            # report is about, which is last month
+            today = datetime.date.today()
+            month_ago = today-datetime.timedelta(days=today.day)
+            params = {'researcher':user['name'],
+                      'month': format_date(month_ago, 'MMMM',
+                                           locale=user.get('language', 'en'))
+                      }
+            
+            # We set html to True because we want both plain and html
+            (plain, html) = template.render('report_due.email', params,
+                                            user.get('language', None),
+                                            html=True)
+            
+            # Send the email with our emailer
+            emailer.send(user['email'], plain, html_content=html)
+
 if __name__ == '__main__':
-    import datetime
-    report_reminder(datetime.date.today()+datetime.timedelta(days=2))
+    report_due()

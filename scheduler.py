@@ -84,6 +84,15 @@ def report_first_monday():
         # We send in the date when the report is due (next friday)
         result = q.enqueue(report_reminder, today+datetime.timedelta(days=4))
 
+@sched.cron_schedule(day='1st fri')
+def report_first_friday():
+    """
+    A scheduled method to send out reminders that the monthly report is due
+    today (on the first Friday of the month).
+    """
+
+    result = q.enqueue(report_due)
+
 # Start scheduling
 sched.start()
 

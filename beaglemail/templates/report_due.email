@@ -14,7 +14,7 @@
 
 {% if output == 'html' %}<p>{% endif %}{% trans %}If you have already submitted the monthly report, then you can ignore this message. If not, then please send it to us by the end of the day.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
 
-{% if output == 'html' %}<p>{% endif %}{% trans %}Thank you, and best wishes from IBP's "Open Budget Survey Tracker" team..{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+{% if output == 'html' %}<p>{% endif %}{% trans %}Thank you, and best wishes from IBP's "Open Budget Survey Tracker" team.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
 
 {%- if output == 'html' -%}
 </body>

@@ -10,7 +10,7 @@
 
 {% if output == 'html' %}<p>{% endif %}{% trans %}The OBI team will be happy to answer any questions you may have prior to your submission, and looks forward to receiving the report!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
 
-{% if output == 'html' %}<p>{% endif %}{% trans %}Many thanks, and best wishes from IBP's "Open Budget Survey Tracker" team.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+{% if output == 'html' %}<p>{% endif %}{% trans %}Thank you, and best wishes from IBP's "Open Budget Survey Tracker" team.{% endtrans %}{% if output == 'html' %}</p>{% endif %}
 
 {%- if output == 'html' -%}
 </body>

@@ -4,7 +4,7 @@
 <head></head>
 <body>
 {%- endif -%}
-{% if output == 'html' %}<p>{% endif %}{% trans %}Hi {{ researcher }}!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
+{% if output == 'html' %}<p>{% endif %}{% trans %}Dear {{ researcher }}!{% endtrans %}{% if output == 'html' %}</p>{% endif %}
 
 {% if output == 'html' %}
 <p>{% trans url=docurl|urlize %}Please be aware that the web page where your government posts (or should post) the key budget documents you are tracking ({{ url }}) has been modified. Would you please check the web page to see if the government has posted some new, relevant information (i.e., a key budget document), or if it has removed important information?{% endtrans %}</p>

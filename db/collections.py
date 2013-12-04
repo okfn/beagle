@@ -168,3 +168,25 @@ class Checksums(MongoCollection):
         the provided checksum list. 
         """
         self.collection.remove({'site':site, 'checksum': {'$in': checksums}})
+
+class Countries(MongoCollection):
+    """
+    The countries collection stores information about countries, such as the
+    OBI score
+    """
+
+    __collection__ = 'countries'
+
+    def update_scores(self, country, scores):
+        """
+        Upsert the database scores for a given country. We only update if
+        the scores have changed.
+        """
+        # Scores must be sorted by year
+        sorted_scores = sorted(scores, key=lambda x: x['year'])
+        # Update the scores if their are some new ones (or insert)
+        self.collection.update({'country':country,
+                                'scores': {'$ne': sorted_scores}},
+                               {'$set': {'scores':sorted_scores}},
+                               upsert=True)
+        

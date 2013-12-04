@@ -22,6 +22,7 @@ from worker import conn
 
 from crawler import crawl_webresources
 from reminder import budget_reminder, report_reminder
+from loader import load_obi_scores
 from beagleboy import settings
 
 # Set up queue and scheduler
@@ -92,6 +93,16 @@ def report_first_friday():
     """
 
     result = q.enqueue(report_due)
+
+@sched.interval_schedule(weeks=4)
+def load_scores():
+    """
+    A scheduled method to load the OBI scores into the database. This happens
+    every four weeks (the source is updated every two years so we just want
+    to check and update if it's new and be reasonably quick about it
+    """
+
+    result = q.enqueue(load_obi_scores)
 
 # Start scheduling
 sched.start()

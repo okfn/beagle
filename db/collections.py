@@ -204,7 +204,7 @@ class Countries(MongoCollection):
         sorted_scores = sorted(scores, key=lambda x: x['year'])
         # Update the scores if their are some new ones (or insert)
         self.collection.update({'country':country,
-                                'scores': {'$ne': sorted_scores}},
-                               {'$set': {'scores':sorted_scores}},
+                                'obi_scores': {'$ne': sorted_scores}},
+                               {'$set': {'obi_scores':sorted_scores}},
                                upsert=True)
         

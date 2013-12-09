@@ -95,7 +95,7 @@ class UpdateChecker(object):
         with Users(spider.crawler.settings) as users:
             for site in set(self.changes.keys()):
                 # Get the user that watches this dataset
-                for user in users.all({'sites.url':site}):
+                for user in users.have_url(site):
                     # Send an email to that user
                     # Get plain and html content to send with the emailer
                     # The scraper email uses docurl for the site url and 

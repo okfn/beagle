@@ -69,7 +69,7 @@ def report_reminder(when=None):
 
     with Users(settings) as users:
         # Loop through each user and compose and email to that user
-        for user in users.all(filters={'admin':False}):
+        for user in users.normal():
             # The template needs the researcher name and when report is due
             # and format the date here to make use of babel's date translations
             # we default to english as the locale if none is found. Note that
@@ -99,7 +99,7 @@ def report_due():
     emailer = sender.Emailer(settings)
 
     with Users(settings) as users:
-        for user in users.all(filters={'admin':False}):
+        for user in users.normal():
             # The template needs the researcher name and when the month the
             # report is about, which is last month
             today = datetime.date.today()

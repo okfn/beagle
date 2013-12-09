@@ -70,12 +70,12 @@ class Users(MongoCollection):
         grace_weeks = self.settings.getint('PUBLICATION_GRACE_PERIOD', 4)
         grace_period = today - datetime.timedelta(weeks=grace_weeks)
 
-        # We only grab pages that are active and within the grace period
+        # We only grab pages for non-muted users and within the grace period
         # Information we need are email, name, and language
-        pipeline = [{'$unwind': '$sites'}, 
+        pipeline = [{'mute':{'$ne':True}},
+                    {'$unwind': '$sites'}, 
                     {'$unwind': '$sites.publication_dates'},
-                    {'$match': {'sites.active': True, 
-                                'sites.publication_dates._d': 
+                    {'$match': {'sites.publication_dates._d': 
                                 {'$gte':grace_period, '$lte':today}}},
                     {'$group': {'_id': 
                                 {'email': '$_id','name':'$name',
@@ -92,16 +92,24 @@ class Users(MongoCollection):
                  'locale':user['_id']['lang'],
                  'sites':user['sites']} for user in self.aggregate(pipeline)]
 
+    def normal(self):
+        """
+        Get all normal users, a normal user is a user who is not an admin and
+        has not been muted by an administrator.
+        """
+        # This is just a simple filter on top of the all function
+        return self.all(filters={'admin':False, 'mute':{'$ne':True}})
+
     def urls(self):
         """
         Get the user urls from the database as a list of strings (urls).
         """
 
         # We use the aggregation framework to get all of the sites urls
-        # We only grab the active sites where there is a url
-        pipeline = [{'$unwind': '$sites'},
-                    {'$match': {'sites.active':True, 
-                                'sites.url':{'$ne':None}}},
+        # We only grab for non-muted users where there is a url
+        pipeline = [{'mute':{'$ne':True}},
+                    {'$unwind': '$sites'},
+                    {'$match': {'sites.url':{'$ne':None}}},
                     {'$group': {'_id':'all', 
                                 'sites': {'$addToSet':'$sites.url'}}
                      }]
@@ -111,6 +119,15 @@ class Users(MongoCollection):
         results = self.aggregate(pipeline)
         return results[0]['sites'] if len(results) else []
 
+    def have_url(self, url):
+        """
+        Get all users that are following a site identified with the given url.
+        These users must also be non-muted since we don't care about muted
+        users.
+        """
+        # Simple wrapper around a call to all
+        return self.all({'sites.url':site, 'mute':{'$ne':True}})
+
     def touch(self, site):
         """
         No this is not named so because we're trying to be funny about the
@@ -119,8 +136,9 @@ class Users(MongoCollection):
         users.
         """
 
-        # We set multi to true since there might be many users for the same site
-        self.collection.update({'sites.url': site}, 
+        # We set multi to true since there might be many users for the same
+        # site (but we don't update users that have been muted)
+        self.collection.update({'sites.url': site, 'mute':{'$ne':True}}, 
                                {'$set': {'sites.$.last_change':\
                                              datetime.datetime.now()}}, 
                                multi=True)

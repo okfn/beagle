@@ -106,7 +106,7 @@ class UpdateChecker(object):
                     # We set html to True because we want both plain 
                     # and html versions
                     (plain, html) = template.render('scraper.email', params,
-                                                    user.get('language', None),
+                                                    user.get('locale', None),
                                                     html=True)
 
                     emailer.send(user['email'], plain, html_content=html)

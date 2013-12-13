@@ -49,7 +49,7 @@ class Users(MongoCollection):
 
         # Rename _id key to email and return users
         for user in users:
-            user['email'] = user.pop('_id')
+            user['email'] = user.pop('username')
 
         return users
 
@@ -78,8 +78,8 @@ class Users(MongoCollection):
                     {'$match': {'sites.publication_dates._d': 
                                 {'$gte':grace_period, '$lte':today}}},
                     {'$group': {'_id': 
-                                {'email': '$_id','name':'$name',
-                                 'lang':'$language'}, 
+                                {'email': '$username','name':'$name',
+                                 'locale':'$locale'}, 
                                 'sites': {'$addToSet': 
                                           {'title':'$sites.title', 
                                            'date':'$sites.publication_dates._d'
@@ -89,7 +89,7 @@ class Users(MongoCollection):
         # Aggregate the results and return a list of the users
         return [{'email':user['_id']['email'],
                  'name':user['_id']['name'],
-                 'locale':user['_id']['lang'],
+                 'locale':user['_id']['locale],
                  'sites':user['sites']} for user in self.aggregate(pipeline)]
 
     def normal(self):

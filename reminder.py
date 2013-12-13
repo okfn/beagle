@@ -77,11 +77,11 @@ def report_reminder(when=None):
             # here because of declension
             params = {'researcher':user['name'],
                       'date':format_date(when, format='long',
-                                         locale=user.get('language', 'en'))
+                                         locale=user.get('locale', 'en'))
                       }
             # We set html to True because we want both plain and html
             (plain, html) = template.render('report_reminder.email', params,
-                                            user.get('language', None),
+                                            user.get('locale', None),
                                             html=True)
             
             # Send the email with our emailer
@@ -106,12 +106,12 @@ def report_due():
             month_ago = today-datetime.timedelta(days=today.day)
             params = {'researcher':user['name'],
                       'month': format_date(month_ago, 'MMMM',
-                                           locale=user.get('language', 'en'))
+                                           locale=user.get('locale', 'en'))
                       }
             
             # We set html to True because we want both plain and html
             (plain, html) = template.render('report_due.email', params,
-                                            user.get('language', None),
+                                            user.get('locale', None),
                                             html=True)
             
             # Send the email with our emailer

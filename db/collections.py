@@ -53,6 +53,22 @@ class Users(MongoCollection):
 
         return users
 
+    def countries(self):
+        """
+        Get all countries registered to users. This is for example used to 
+        filter what countries the OBI score should be loaded for.
+
+        Output is a list of country names
+        """
+
+        # We use the aggregation pipeline to group by all of the countries
+        pipeline = [{'$match':{'country':{'$exists':True, '$ne':None}}},
+                    {'$group': {'_id':'$country'}}]
+        # We return a list of country names. In the user db they're stored
+        # as 'IS - Iceland' so we need to split them and grab the latter part
+        return [u['_id'].split(' - ')[1] for u in self.aggregate(pipeline)]
+        
+
     def remindees(self):
         """
         Get users from the database who's sites fall within the grace period
@@ -72,7 +88,7 @@ class Users(MongoCollection):
 
         # We only grab pages for non-muted users and within the grace period
         # Information we need are email, name, and language
-        pipeline = [{'mute':{'$ne':True}},
+        pipeline = [{'$match':{'mute':{'$ne':True}}},
                     {'$unwind': '$sites'}, 
                     {'$unwind': '$sites.publication_dates'},
                     {'$match': {'sites.publication_dates._d': 
@@ -89,7 +105,7 @@ class Users(MongoCollection):
         # Aggregate the results and return a list of the users
         return [{'email':user['_id']['email'],
                  'name':user['_id']['name'],
-                 'locale':user['_id']['locale],
+                 'locale':user['_id']['locale'],
                  'sites':user['sites']} for user in self.aggregate(pipeline)]
 
     def normal(self):
@@ -107,7 +123,7 @@ class Users(MongoCollection):
 
         # We use the aggregation framework to get all of the sites urls
         # We only grab for non-muted users where there is a url
-        pipeline = [{'mute':{'$ne':True}},
+        pipeline = [{'$match':{'mute':{'$ne':True}}},
                     {'$unwind': '$sites'},
                     {'$match': {'sites.url':{'$ne':None}}},
                     {'$group': {'_id':'all', 

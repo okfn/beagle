@@ -17,7 +17,7 @@
 
 from scrapy.settings import CrawlerSettings
 import beagleboy.settings
-from db.collections import Countries
+from db.collections import Users, Countries
 import urllib2
 import json
 
@@ -35,16 +35,23 @@ def load_obi_scores():
     json_file = urllib2.urlopen(dataurl)
     data = json.loads(json_file.read())
 
-    with Countries(settings) as countries:
-        for country in data['country']:
-            # Get the country name
-            name = country['name']
-            # Get the country scores
-            scores = [{'year':k[3:], 'score':v['roundobi']}\
-                          for k,v in country.iteritems()\
-                          if k.startswith('db_')]
-            # Write this to the database
-            countries.update_scores(name, scores)
+    with Users(settings) as users:
+        # We only add OBI scores for countries that have been assigned to users
+        # so we fetch the countries of users so we can check if the country is
+        # in that list (we lowercase all so matching will be case insensitive)
+        user_countries = map(lambda x: x.lower(), users.countries())
+
+        with Countries(settings) as countries:
+            for country in data['country']:
+                if country['name'].lower() in user_countries:
+                    # Get the country name
+                    name = country['name']
+                    # Get the country scores
+                    scores = [{'year':k[3:], 'score':v['roundobi']}\
+                                  for k,v in country.iteritems()\
+                                  if k.startswith('db_')]
+                    # Write this to the database
+                    countries.update_scores(name, scores)
 
 if __name__ == '__main__':
     load_obi_scores()

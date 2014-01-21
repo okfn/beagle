@@ -82,23 +82,21 @@ class Users(MongoCollection):
         # Get grace period. We compute it back in time since we want to
         # find all pages which should be getting reminder emails (they get
         # reminders every week during the grace period)
-        today = datetime.datetime.today()
-        grace_weeks = self.settings.getint('PUBLICATION_GRACE_PERIOD', 4)
-        grace_period = today - datetime.timedelta(weeks=grace_weeks)
+        today = datetime.datetime.combine(datetime.date.today(),
+                                          datetime.time(0))
 
         # We only grab pages for non-muted users and within the grace period
         # Information we need are email, name, and language
         pipeline = [{'$match':{'mute':{'$ne':True}}},
                     {'$unwind': '$sites'}, 
-                    {'$unwind': '$sites.publication_dates'},
-                    {'$match': {'sites.publication_dates._d': 
-                                {'$gte':grace_period, '$lte':today}}},
+                    {'$match': {'sites.search_dates.start': {'$lte': today},
+                                'sites.search_dates.end': {'$gte':today}}},
                     {'$group': {'_id': 
                                 {'email': '$username','name':'$name',
                                  'locale':'$locale'}, 
                                 'sites': {'$addToSet': 
                                           {'title':'$sites.title', 
-                                           'date':'$sites.publication_dates._d'
+                                           'date':'$sites.search_dates.start'
                                            }}}
                     }]
         

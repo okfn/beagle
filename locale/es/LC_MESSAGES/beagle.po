@@ -1,0 +1,104 @@
+# Translations template for PROJECT.
+# Copyright (C) 2014 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# 
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: Open Budget Tracker\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2014-01-22 13:11+0000\n"
+"PO-Revision-Date: 2014-04-22 14:25+0000\n"
+"Last-Translator: tryggvib <tryggvib@fsfi.is>\n"
+"Language-Team: Spanish (http://www.transifex.com/projects/p/open-budget-tracker/language/es/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.3\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: beaglemail/templates/report_due.email:1
+msgid "Monthly Report due Today"
+msgstr "El informe mensual vence hoy"
+
+#: beaglemail/templates/report_due.email:7
+#: beaglemail/templates/report_reminder.email:7
+#: beaglemail/templates/scraper.email:7
+#, python-format
+msgid "Dear %(researcher)s!"
+msgstr "Estimados %(researcher)s:"
+
+#: beaglemail/templates/report_due.email:10
+#: beaglemail/templates/report_due.email:12
+#, python-format
+msgid "Your %(month)s report for the Open Budget Survey Tracker is due today."
+msgstr "Su informe de %(month)s para la Herramienta de Seguimiento de la Encuesta de Presupuesto Abierto vence hoy."
+
+#: beaglemail/templates/report_due.email:15
+msgid ""
+"If you have already submitted the monthly report, then you can ignore this "
+"message. If not, then please send it to us by the end of the day."
+msgstr "Si ya entregó el informe mensual, puede ignorar este mensaje. Si aún no lo envió, envíelo antes del final del día."
+
+#: beaglemail/templates/report_due.email:17
+#: beaglemail/templates/report_reminder.email:13
+#: beaglemail/templates/scraper.email:23
+msgid "Thank you, and best wishes from IBP's \"Open Budget Survey Tracker\" team."
+msgstr "Gracias, y los mejores deseos de parte del equipo de la Herramienta de Seguimiento de la Encuesta de Presupuesto del IBP."
+
+#: beaglemail/templates/report_reminder.email:1
+msgid "Monthly Report Reminder"
+msgstr "Recordatorio de informe mensual"
+
+#: beaglemail/templates/report_reminder.email:9
+#, python-format
+msgid ""
+"This is a friendly reminder that your monthly report submission for the Open"
+" Budget Survey Tracker is due this coming Friday, %(date)s."
+msgstr "Este es un recordatorio de que su presentación del informe mensual para la Herramienta de Seguimiento de la Encuesta de Presupuesto vence este viernes, %(date)s."
+
+#: beaglemail/templates/report_reminder.email:11
+msgid ""
+"The OBI team will be happy to answer any questions you may have prior to "
+"your submission, and looks forward to receiving the report!"
+msgstr "El equipo del OBI se complacerá en contestar cualquier pregunta que pueda tener antes de su entrega, ¡y está esperando recibir el informe!"
+
+#: beaglemail/templates/scraper.email:1
+msgid "A web page you are watching has changed"
+msgstr "Una página de Internet que usted estaba mirando ha cambiado"
+
+#: beaglemail/templates/scraper.email:10 beaglemail/templates/scraper.email:12
+#, python-format
+msgid ""
+"Please be aware that the web page where your government posts (or should "
+"post) the key budget documents you are tracking (%(url)s) has been modified."
+" Would you please check the web page to see if the government has posted "
+"some new, relevant information (i.e., a key budget document), or if it has "
+"removed important information?"
+msgstr "Tenga en cuenta que la página de Internet en la que su gobierno publica (o debería publicar) los documentos presupuestarios clave que usted está siguiendo (%(url)s) se ha modificado. ¿Podría revisar la página de Internet para ver si el gobierno ha publicado alguna información nueva o relevante (por ejemplo, un documento presupuestario clave), o si ha eliminado información importante?"
+
+#: beaglemail/templates/scraper.email:15
+msgid ""
+"Please note that sometimes changes are made to these web pages that do not "
+"relate to the key budget documents that you are tracking, which may be the "
+"case in this instance. However, the current notification system for the "
+"Tracker is not able to easily determine \"relevance,\" so it will notify you"
+" every time anything on the web page it monitors changes."
+msgstr "Tenga en cuenta que algunas veces se realizan cambios en las páginas de Internet que no tienen relación con los documentos presupuestarios clave que está siguiendo, lo que podría ser su caso en esta instancia. Sin embargo, el sistema de notificaciones actual para la Herramienta de Seguimiento no puede determinar fácilmente la \"relevancia,\" de modo que le notificará cada vez que algo cambie en la página web que controla."
+
+#: beaglemail/templates/scraper.email:15
+msgid ""
+"Since there is no way for us to know whether changes relate to the documents"
+" you are tracking, we thank you for your patience in checking the web page "
+"every time you receive an email like this one."
+msgstr "Ya que no hay forma de que nosotros sepamos si los cambios tienen relación con los documentos que está siguiendo, le agradecemos su paciencia para revisar la página de Internet cada vez que reciba un correo electrónico como este."
+
+#: beaglemail/templates/scraper.email:18 beaglemail/templates/scraper.email:20
+#, python-format
+msgid ""
+"If you notice any relevant modifications (for example, a new key budget "
+"document has been posted or removed), please use the form at %(url)s to "
+"update the information about the public availability of the key budget "
+"document."
+msgstr "Si usted advierte cualquier modificación relevante (por ejemplo, que se publicó o eliminó un documento presupuestario clave nuevo), utilice el formulario que se encuentra en %(url)s para actualizar la información sobre la disponibilidad pública de dicho documento."

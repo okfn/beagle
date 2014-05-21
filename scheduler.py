@@ -38,7 +38,7 @@ def crawl():
     # Enqueue via Redis queue the web resource crawler
     result = q.enqueue(crawl_webresources)
 
-@sched.interval_schedule(minutes=2)
+@sched.interval_schedule(weeks=1)
 def reminders():
     """
     A scheduled method that sends out the email reminders every week.

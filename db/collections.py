@@ -66,7 +66,7 @@ class Users(MongoCollection):
                     {'$group': {'_id':'$country'}}]
         # We return a list of country names. In the user db they're stored
         # as 'IS - Iceland' so we need to split them and grab the latter part
-        return [u['_id'].split(' - ')[1] for u in self.aggregate(pipeline)]
+        return set([u['_id'].split(' - ')[1] for u in self.aggregate(pipeline)])
         
 
     def remindees(self):
@@ -209,16 +209,14 @@ class Countries(MongoCollection):
 
     __collection__ = 'countries'
 
-    def update_scores(self, country, scores):
+    def update_scores(self, code, country, scores):
         """
         Upsert the database scores for a given country. We only update if
         the scores have changed.
         """
         # Scores must be sorted by year
         sorted_scores = sorted(scores, key=lambda x: x['year'])
-        # Update the scores if their are some new ones (or insert)
-        self.collection.update({'country':country,
-                                'obi_scores': {'$ne': sorted_scores}},
+        # Update the scores
+        self.collection.update({'country':country, 'code': code},
                                {'$set': {'obi_scores':sorted_scores}},
                                upsert=True)
-        

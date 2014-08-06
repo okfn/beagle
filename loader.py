@@ -44,14 +44,16 @@ def load_obi_scores():
         with Countries(settings) as countries:
             for country in data['country']:
                 if country['name'].lower() in user_countries:
-                    # Get the country name
+                    # Get the country name and alpha2 code
                     name = country['name']
+                    code = country['alpha2']
+
                     # Get the country scores
                     scores = [{'year':k[3:], 'score':v['roundobi']}\
                                   for k,v in country.iteritems()\
                                   if k.startswith('db_')]
                     # Write this to the database
-                    countries.update_scores(name, scores)
+                    countries.update_scores(code, name, scores)
 
 if __name__ == '__main__':
     load_obi_scores()
